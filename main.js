@@ -64,11 +64,11 @@ async function inkanOnCanvas() {
       .slice(8, 10);
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.font = fsize + "pt HGS行書体";
+  ctx.font = fsize + "pt HGS行書体, HGS明朝E";
   var namewidth = ctx.measureText(nametxt).width;
 
   ctx.setTransform(1, 0, 0, 80 / namewidth, 0, (80 / namewidth) * 65.332 + 6.5335);
-  ctx.font = fsize + "pt HGS行書体";
+  ctx.font = fsize + "pt HGS行書体, HGS明朝E";
   ctx.fillStyle = "rgba(255, 32, 0)";
   tategaki(ctx, nametxt, 0);
 
