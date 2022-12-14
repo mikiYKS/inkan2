@@ -18,9 +18,7 @@ async function run() {
   await Word.run(async (context) => {
     //名前が空なら処理なし
     if (
-      !$("#name")
-        .val()
-        .toString()
+      !$("#name").val()
     ) {
     } else {
       inkanOnCanvas();
