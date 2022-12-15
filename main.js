@@ -1,4 +1,7 @@
 Office.onReady(function() {
+
+  getUser();
+
   var dt = new Date();
   var txtDate = dt.getFullYear().toString() + "-" + (dt.getMonth() + 1) + "-" + dt.getDate();
   $("#date").val(txtDate);
@@ -109,4 +112,50 @@ function tategaki(context, text, y) {
       context.fillText(ch, 50 - lineHeight / 2, y + lineHeight * j);
     });
   });
+}
+
+
+Office.initialize = function(reason) {
+  if (OfficeHelpers.Authenticator.isAuthDialog()) return;
+};
+
+async function getUser() {
+  var authenticator;
+  var client_id = "2e1be2b2-01f2-466e-84cd-65f2b689fbce";
+  var redirect_url = "https://mikiyks.github.io/inkan/";
+  var scope = "https://graph.microsoft.com/user.read";
+  var access_token;
+
+  authenticator = new OfficeHelpers.Authenticator();
+
+  //access_token取得
+  authenticator.endpoints.registerMicrosoftAuth(client_id, {
+    redirectUrl: redirect_url,
+    scope: scope
+  });
+
+  authenticator
+    .authenticate(OfficeHelpers.DefaultEndpoints.Microsoft)
+    .then(function(token) {
+      access_token = token.access_token;
+      $("#exec").prop("disabled", false);
+      //API呼び出し
+      $(function() {
+        $.ajax({
+          url: "https://graph.microsoft.com/v1.0/me",
+          type: "GET",
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+          },
+          success: function(data) {
+            //取得した苗字をセット
+            $("#name").val(data.surname);
+          },
+          error: function(data) {
+            console.log(data);
+          }
+        });
+      });
+    })
+    .catch(OfficeHelpers.Utilities.log);
 }
