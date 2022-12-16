@@ -121,7 +121,7 @@ Office.initialize = function(reason) {
 
 async function getUser() {
   var authenticator;
-  var client_id = "a9a22d3d-f8ff-4457-94ef-2d7d329ac391";
+  var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
   var redirect_url = "https://mikiyks.github.io/inkan2/";
   var scope = "https://graph.microsoft.com/user.read";
   var access_token;
