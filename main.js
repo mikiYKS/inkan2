@@ -1,4 +1,4 @@
-Office.onReady(function() {
+Office.onReady(function () {
 
   getUser();
 
@@ -25,6 +25,22 @@ async function run() {
     ) {
     } else {
       inkanOnCanvas();
+
+      //ログ出力
+      $(function () {
+        Office.context.document.getFilePropertiesAsync(async function (asyncResult) {
+          var fileUrl = asyncResult.value.url;
+          var fileName;
+          var inkanName = $("#name").val();
+          if (fileUrl == "") {
+            fileName = '未保存ワード';
+          } else {
+            fileName = fileUrl.match(".+/(.+?)([\?#;].*)?$")[1];
+          };
+          inkanLog(inkanName, fileName);
+        });
+      });
+
     }
   });
 }
@@ -107,15 +123,15 @@ async function insertImage(base64img) {
 function tategaki(context, text, y) {
   var textList = text.split("\n");
   var lineHeight = context.measureText("あ").width;
-  textList.forEach(function(elm, i) {
-    Array.prototype.forEach.call(elm, function(ch, j) {
+  textList.forEach(function (elm, i) {
+    Array.prototype.forEach.call(elm, function (ch, j) {
       context.fillText(ch, 50 - lineHeight / 2, y + lineHeight * j);
     });
   });
 }
 
 
-Office.initialize = function(reason) {
+Office.initialize = function (reason) {
   if (OfficeHelpers.Authenticator.isAuthDialog()) return;
 };
 
@@ -136,26 +152,66 @@ async function getUser() {
 
   authenticator
     .authenticate(OfficeHelpers.DefaultEndpoints.Microsoft)
-    .then(function(token) {
+    .then(function (token) {
       access_token = token.access_token;
       $("#exec").prop("disabled", false);
       //API呼び出し
-      $(function() {
+      $(function () {
         $.ajax({
           url: "https://graph.microsoft.com/v1.0/me",
           type: "GET",
-          beforeSend: function(xhr) {
+          beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + access_token);
           },
-          success: function(data) {
+          success: function (data) {
             //取得した苗字をセット
             $("#name").val(data.surname);
           },
-          error: function(data) {
+          error: function (data) {
             console.log(data);
           }
         });
       });
     })
     .catch(OfficeHelpers.Utilities.log);
+}
+
+//SharePointListにログ出力
+function inkanLog(inkanName, inkanFile) {
+  var authenticator;
+  var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
+  var redirect_url = "https://mikiyks.github.io/inkan2/";
+  var scope = "https://graph.microsoft.com/Sites.ReadWrite.All";
+  var access_token;
+  authenticator = new OfficeHelpers.Authenticator();
+  //access_token取得
+  authenticator.endpoints.registerMicrosoftAuth(client_id, {
+    redirectUrl: redirect_url,
+    scope: scope
+  });
+  authenticator.authenticate(OfficeHelpers.DefaultEndpoints.Microsoft).then(function (token) {
+    access_token = token.access_token;
+    $(function () {
+      $.ajax({
+        url:
+          "https://graph.microsoft.com/v1.0/sites/20531fc2-c6ab-4e1e-a532-9c8e15afed0d/lists/6aac0560-622e-4ee1-ba8f-73b32d8e9f05/items",
+        type: "POST",
+        data: JSON.stringify({
+          fields: {
+            Title: inkanName,
+            FileName: inkanFile
+          }
+        }),
+        contentType: "application/json",
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+        }
+      }).then(
+        async function (data) { },
+        function (data) {
+          console.log(data);
+        }
+      );
+    });
+  });
 }
