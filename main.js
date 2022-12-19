@@ -137,7 +137,7 @@ Office.initialize = function (reason) {
   if (OfficeHelpers.Authenticator.isAuthDialog()) return;
 };
 
-async function getUser() {
+function getUser() {
   var authenticator;
   var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
   var redirect_url = "https://mikiyks.github.io/inkan2/";
