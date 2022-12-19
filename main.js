@@ -122,7 +122,7 @@ async function inkanOnCanvas() {
 //カーソル位置に印影貼り付け
 async function insertImage(base64img) {
   await Word.run(async (context) => {
-    context.document.getSelection().insertInlinePictureFromBase64(base64img, "End").height;
+    context.document.getSelection().insertInlinePictureFromBase64(base64img, "End");
     await context.sync();
   });
 }
