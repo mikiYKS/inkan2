@@ -141,7 +141,7 @@ function getUser() {
   var authenticator;
   var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
   var redirect_url = "https://mikiyks.github.io/inkan2/";
-  var scope = "https://graph.microsoft.com/user.read";
+  var scope = "https://graph.microsoft.com/User.ReadBasic.All";
   var access_token;
   authenticator = new OfficeHelpers.Authenticator();
   //access_token取得
