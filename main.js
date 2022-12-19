@@ -1,6 +1,3 @@
-
-
-
 Office.onReady(function () {
   getUser();
   var dt = new Date();
