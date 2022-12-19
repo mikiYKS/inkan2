@@ -1,9 +1,13 @@
-Office.onReady(function () {
-
-  getUser();
-
   var dt = new Date();
   var txtDate = dt.getFullYear().toString() + "-" + (dt.getMonth() + 1) + "-" + dt.getDate();
+  var authenticator;
+  var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
+  var redirect_url = "https://mikiyks.github.io/inkan2/";
+  var scope;
+  var access_token;
+
+Office.onReady(function () {
+  getUser();
   $("#date").val(txtDate);
   $("#run").click(() => tryCatch(run));
   //日付不要にチェック入れたら日付グレーアウト
@@ -24,8 +28,8 @@ async function run() {
       !$("#name").val()
     ) {
     } else {
+      //印鑑生成実行
       inkanOnCanvas();
-
       //ログ出力
       $(function () {
         Office.context.document.getFilePropertiesAsync(async function (asyncResult) {
@@ -40,7 +44,6 @@ async function run() {
           inkanLog(inkanName, fileName);
         });
       });
-
     }
   });
 }
@@ -53,16 +56,19 @@ async function tryCatch(callback) {
   }
 }
 
+//キャンバスに印影作成
 async function inkanOnCanvas() {
   var canvas = document.querySelector("#canvas");
   var ctx = canvas.getContext("2d");
   var nametxt = $("#name")
     .val()
     .toString()
-    .replace("（", "?")
-    .replace("(", "?")
-    .replace("）", "?")
-    .replace(")", "?");
+    .replace("（", "")
+    .replace("(", "")
+    .replace("）", "")
+    .replace(")", "")
+    .replace(" ", "")
+    .replace("　", "");
   var lenname = nametxt.length;
   var fsize = 55 - (7 / 3) * (lenname - 1);
   var dateText =
@@ -104,7 +110,7 @@ async function inkanOnCanvas() {
     ctx.font = 16 + "pt Calibri bold";
     ctx.fillStyle = "rgba(255, 32, 0)";
     ctx.fillText(dateText, 50 - ctx.measureText(dateText).width / 2, 118);
-  }
+  };
 
   var nameBase64Img = canvas.toDataURL().replace(/^.*,/, "");
 
@@ -113,6 +119,7 @@ async function inkanOnCanvas() {
   ctx.clearRect(0, 0, 100, 120);
 }
 
+//カーソル位置に印影貼り付け
 async function insertImage(base64img) {
   await Word.run(async (context) => {
     context.document.getSelection().insertInlinePictureFromBase64(base64img, "End").height = 43;
@@ -120,6 +127,7 @@ async function insertImage(base64img) {
   });
 }
 
+//縦書き変換
 function tategaki(context, text, y) {
   var textList = text.split("\n");
   var lineHeight = context.measureText("あ").width;
@@ -136,26 +144,20 @@ Office.initialize = function (reason) {
 };
 
 async function getUser() {
-  var authenticator;
-  var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
-  var redirect_url = "https://mikiyks.github.io/inkan2/";
-  var scope = "https://graph.microsoft.com/user.read";
-  var access_token;
-
+  scope = "https://graph.microsoft.com/user.read";
   authenticator = new OfficeHelpers.Authenticator();
-
   //access_token取得
   authenticator.endpoints.registerMicrosoftAuth(client_id, {
     redirectUrl: redirect_url,
     scope: scope
   });
-
+  //認証
   authenticator
     .authenticate(OfficeHelpers.DefaultEndpoints.Microsoft)
     .then(function (token) {
       access_token = token.access_token;
       $("#exec").prop("disabled", false);
-      //API呼び出し
+      //API呼び出し　ユーザー情報取得
       $(function () {
         $.ajax({
           url: "https://graph.microsoft.com/v1.0/me",
@@ -178,19 +180,17 @@ async function getUser() {
 
 //SharePointListにログ出力
 function inkanLog(inkanName, inkanFile) {
-  var authenticator;
-  var client_id = "f00c6849-1c45-474e-8aa4-4b7bd80dd530";
-  var redirect_url = "https://mikiyks.github.io/inkan2/";
-  var scope = "https://graph.microsoft.com/Sites.ReadWrite.All";
-  var access_token;
+  scope = "https://graph.microsoft.com/Sites.ReadWrite.All";
   authenticator = new OfficeHelpers.Authenticator();
   //access_token取得
   authenticator.endpoints.registerMicrosoftAuth(client_id, {
     redirectUrl: redirect_url,
     scope: scope
   });
+  //認証
   authenticator.authenticate(OfficeHelpers.DefaultEndpoints.Microsoft).then(function (token) {
     access_token = token.access_token;
+    //API呼び出し印鑑ログ投稿
     $(function () {
       $.ajax({
         url:
