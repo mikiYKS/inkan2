@@ -160,14 +160,14 @@ function getUser() {
       //API呼び出し　ユーザー情報取得
       $(function () {
         $.ajax({
-          url: "https://graph.microsoft.com/v1.0/me",
+          url: "https://graph.microsoft.com/v1.0/me/surname",
           type: "GET",
           beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + access_token);
           },
           success: function (data) {
             //取得した苗字をセット
-            $("#name").val(data.surname);
+            $("#name").val(data.value);
           },
           error: function (data) {
             console.log(data);
